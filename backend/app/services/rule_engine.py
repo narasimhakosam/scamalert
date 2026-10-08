@@ -113,18 +113,7 @@ RULES: list[tuple[IndicatorCode, Severity, re.Pattern, str]] = [
         ),
         "The message requests sensitive identity documents. Do not share government IDs through unofficial channels."
     ),
-    # Direct UPI VPA payment handle
-    (
-        IndicatorCode.PAYMENT_REQUEST,
-        Severity.HIGH,
-        re.compile(
-            r'\b[a-zA-Z0-9\.\-_]+@(?:upi|ybl|okaxis|icici|paytm|axl|ibl|barodampay|sbi|apl|okhdfcbank)\b',
-            re.IGNORECASE
-        ),
-        "The message includes a direct UPI Virtual Payment Address (VPA). Never send money or approve collect requests to unverified UPI handles."
-    ),
 ]
-
 
 
 def detect_indicators(text: str) -> list[Indicator]:

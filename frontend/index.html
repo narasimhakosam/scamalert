@@ -120,6 +120,10 @@
         </p>
       </div>
       <div class="flex items-center justify-center gap-2 shrink-0">
+        <button id="sound-toggle-btn" type="button" onclick="toggleSound()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-xs font-semibold text-text-primary hover:border-primary transition-colors shadow-2xs">
+          <span class="material-symbols-outlined text-sm text-primary" id="sound-icon">volume_up</span>
+          <span id="sound-text">Sound: ON</span>
+        </button>
         <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 text-xs font-semibold border border-green-200">
           <span class="material-symbols-outlined text-sm">lock</span>
           Zero Data Retention
@@ -169,17 +173,21 @@
             <span class="w-2 h-2 rounded-full bg-red-500"></span>
             ₹499 Internship Fee (High Risk)
           </button>
-          <button type="button" onclick="loadSample('upi_domain')" class="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-medium border border-red-200 flex items-center gap-1 transition-colors">
+          <button type="button" onclick="loadSample('parttime')" class="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-medium border border-red-200 flex items-center gap-1 transition-colors">
             <span class="w-2 h-2 rounded-full bg-red-500"></span>
-            UPI + Bare Domain Link (.xyz)
+            Telegram Task Ponzi (t.me Lure)
           </button>
-          <button type="button" onclick="loadSample('parttime')" class="px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-medium border border-amber-200 flex items-center gap-1 transition-colors">
+          <button type="button" onclick="loadSample('delivery')" class="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-medium border border-red-200 flex items-center gap-1 transition-colors">
+            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+            India Post Parcel (.xyz Phishing)
+          </button>
+          <button type="button" onclick="loadSample('form')" class="px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-medium border border-amber-200 flex items-center gap-1 transition-colors">
             <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-            Telegram Daily Task (Suspicious)
+            Unverified Form (forms.gle)
           </button>
           <button type="button" onclick="loadSample('college')" class="px-2.5 py-1.5 rounded-lg bg-green-50 hover:bg-green-100 text-green-700 text-xs font-medium border border-green-200 flex items-center gap-1 transition-colors">
             <span class="w-2 h-2 rounded-full bg-green-500"></span>
-            Semester Exam Fee Notice (Safe)
+            Exam Fee Portal (Safe .ac.in)
           </button>
           <button type="button" onclick="loadSample('bank')" class="px-2.5 py-1.5 rounded-lg bg-green-50 hover:bg-green-100 text-green-700 text-xs font-medium border border-green-200 flex items-center gap-1 transition-colors">
             <span class="w-2 h-2 rounded-full bg-green-500"></span>
@@ -187,6 +195,7 @@
           </button>
         </div>
       </div>
+
 
       <!-- Input Textarea Container -->
       <div class="relative">
@@ -274,29 +283,21 @@
     <section id="results-section" aria-label="Analysis Results" class="hidden flex-col gap-6">
 
       <!-- Breadcrumb & Status Meta Bar -->
-      <div class="bg-surface rounded-xl border border-border py-2.5 px-4 flex flex-wrap justify-between items-center text-xs text-text-secondary gap-3 shadow-xs">
-        <div class="flex flex-wrap items-center gap-2">
+      <div class="bg-surface rounded-xl border border-border py-2.5 px-4 flex flex-wrap justify-between items-center text-xs text-text-secondary gap-2 shadow-xs">
+        <div class="flex items-center gap-2">
           <button onclick="scrollToChecker()" class="hover:text-primary transition-colors flex items-center gap-1 font-medium">
             <span class="material-symbols-outlined text-sm">edit</span>
-            <span>Check Another</span>
+            <span>Check Another Message</span>
           </button>
           <span>/</span>
           <span class="text-text-primary font-semibold" id="report-id-label">Scam Report #SG-84920</span>
         </div>
-        
         <div class="flex items-center gap-2">
-          <button onclick="copyScamAlertCard()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 font-bold transition-all text-[11px]">
-            <span class="material-symbols-outlined text-sm">content_copy</span>
-            <span>Copy WhatsApp Alert Card</span>
-          </button>
-          <button onclick="window.print()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-text-primary border border-gray-300 font-semibold transition-all text-[11px]">
-            <span class="material-symbols-outlined text-sm">print</span>
-            <span>Print Report</span>
-          </button>
           <span id="header-risk-pill" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border">
             <span class="w-1.5 h-1.5 rounded-full" id="header-risk-dot"></span>
             <span id="header-risk-text">HIGH RISK</span>
           </span>
+          <span id="analyzed-timestamp">Analyzed just now · Source: SMS</span>
         </div>
       </div>
 
@@ -309,11 +310,17 @@
           <!-- 1. Result Assessment Hero Card -->
           <article class="bg-surface rounded-2xl border border-border p-6 shadow-[0_2px_8px_rgba(26,32,51,0.06)] relative overflow-hidden" id="result-hero-card">
             <!-- Header Tag -->
-            <div class="flex items-center justify-between pb-3 border-b border-border/70 mb-4">
+            <div class="flex flex-wrap items-center justify-between pb-3 border-b border-border/70 mb-4 gap-2">
               <span class="text-xs uppercase font-extrabold tracking-wider text-text-secondary">RESULT ASSESSMENT</span>
-              <div class="flex items-center gap-1.5 bg-blue-50/80 px-2.5 py-1 rounded-full border border-blue-100 text-xs text-text-secondary">
-                <span class="material-symbols-outlined text-sm text-primary">psychology</span>
-                <span class="font-medium text-text-primary" id="model-tag">Model: spam, 94%</span>
+              <div class="flex items-center gap-2">
+                <span id="scam-category-badge" class="hidden inline-flex items-center gap-1 bg-amber-50 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-full border border-amber-200">
+                  <span class="material-symbols-outlined text-xs">category</span>
+                  <span id="scam-category-text">Internship Fee Scam</span>
+                </span>
+                <div class="flex items-center gap-1.5 bg-blue-50/80 px-2.5 py-1 rounded-full border border-blue-100 text-xs text-text-secondary">
+                  <span class="material-symbols-outlined text-sm text-primary">psychology</span>
+                  <span class="font-medium text-text-primary" id="model-tag">Model: spam, 94%</span>
+                </div>
               </div>
             </div>
 
@@ -339,7 +346,7 @@
             </p>
 
             <!-- RiskMeter Component -->
-            <div class="bg-gray-50/80 rounded-xl p-4 border border-border mb-2" role="region" aria-label="Risk Meter">
+            <div class="bg-gray-50/80 rounded-xl p-4 border border-border mb-4" role="region" aria-label="Risk Meter">
               <div class="flex justify-between items-center mb-2">
                 <span class="text-xs font-semibold text-text-primary">Calculated Risk Index</span>
                 <span id="meter-threat-label" class="text-xs font-bold text-high-risk-main">91% High Threat</span>
@@ -368,9 +375,27 @@
               </div>
             </div>
 
-            <div class="text-xs text-text-secondary mt-3 flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-base text-primary">info</span>
-              <span>Based on trained natural language model, scam keyword heuristics, and URL destination analysis.</span>
+            <!-- 1-Click Action Cluster: WhatsApp Share, Copy Summary, Print/PDF Report -->
+            <div class="pt-3 border-t border-border/70 flex flex-wrap items-center justify-between gap-2.5">
+              <div class="flex flex-wrap items-center gap-2">
+                <button type="button" onclick="shareToWhatsApp()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs transition-colors" title="Warn friends or student group on WhatsApp">
+                  <span class="material-symbols-outlined text-sm">chat</span>
+                  <span>Share on WhatsApp</span>
+                </button>
+                <button type="button" onclick="copyReport()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-text-primary text-xs font-semibold border border-gray-300/80 transition-colors" title="Copy structured warning text">
+                  <span class="material-symbols-outlined text-sm">content_copy</span>
+                  <span id="copy-btn-text">Copy Warning</span>
+                </button>
+                <button type="button" onclick="window.print()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-text-primary text-xs font-semibold border border-gray-300/80 transition-colors" title="Export as clean PDF document">
+                  <span class="material-symbols-outlined text-sm">print</span>
+                  <span>Print / PDF</span>
+                </button>
+              </div>
+
+              <div class="text-xs text-text-secondary flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm text-primary">verified</span>
+                <span>Explainable AI Verified</span>
+              </div>
             </div>
           </article>
 
@@ -718,6 +743,75 @@
       </button>
     </div>
   </div>
+
+  <!-- MODAL: Deep Link Security Inspector -->
+  <div id="link-inspector-modal" class="modal-backdrop hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-surface rounded-2xl border border-border shadow-2xl max-w-lg w-full p-6 relative">
+      <button onclick="closeModal('link-inspector-modal')" class="absolute top-4 right-4 text-text-secondary hover:text-text-primary p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+
+      <div class="flex items-center gap-2 text-primary mb-2">
+        <span class="material-symbols-outlined text-2xl">travel_explore</span>
+        <h3 class="font-display text-lg font-bold">Deep Link Security Inspector</h3>
+      </div>
+      <p class="text-xs text-text-secondary mb-4">
+        Forensic domain and protocol breakdown for detected link destination:
+      </p>
+
+      <div class="space-y-3 text-xs mb-5">
+        <div class="p-3 rounded-xl border border-border bg-gray-50 flex flex-col gap-1">
+          <span class="text-[11px] font-bold text-text-secondary uppercase">Full Target URL</span>
+          <span id="inspect-full-url" class="font-mono text-xs text-text-primary break-all select-all font-semibold">https://example.com</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="p-3 rounded-xl border border-border bg-gray-50 flex flex-col gap-0.5">
+            <span class="text-[11px] font-bold text-text-secondary uppercase">Domain Host</span>
+            <span id="inspect-domain" class="font-mono text-xs text-text-primary font-bold truncate">example.com</span>
+          </div>
+          <div class="p-3 rounded-xl border border-border bg-gray-50 flex flex-col gap-0.5">
+            <span class="text-[11px] font-bold text-text-secondary uppercase">Security Verdict</span>
+            <span id="inspect-verdict" class="text-xs font-bold text-red-600">High Risk (Malicious)</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="p-3 rounded-xl border border-border bg-gray-50 flex flex-col gap-0.5">
+            <span class="text-[11px] font-bold text-text-secondary uppercase">Threat Category</span>
+            <span id="inspect-threat" class="text-xs font-bold text-text-primary">URL Shortener Mask</span>
+          </div>
+          <div class="p-3 rounded-xl border border-border bg-gray-50 flex flex-col gap-0.5">
+            <span class="text-[11px] font-bold text-text-secondary uppercase">Calculated Link Risk</span>
+            <span id="inspect-score" class="text-xs font-bold text-red-600">85 / 100</span>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl border border-amber-200 bg-amber-50/70 flex flex-col gap-1">
+          <span class="text-[11px] font-bold text-amber-900 uppercase flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs">shield</span>
+            Analysis & Threat Explanation
+          </span>
+          <p id="inspect-explanation" class="text-xs text-amber-800 leading-relaxed">
+            This URL shortener obfuscates the real web destination, frequently utilized in SMS phishing to bypass keyword filters.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between gap-3 pt-3 border-t border-border">
+        <span class="text-[11px] text-text-secondary flex items-center gap-1">
+          <span class="material-symbols-outlined text-xs text-red-600">warning</span>
+          Do not open suspicious links in browser
+        </span>
+        <button type="button" onclick="closeModal('link-inspector-modal')" class="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl transition-colors">
+          Close Inspector
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <script src="app.js"></script>
 </body>

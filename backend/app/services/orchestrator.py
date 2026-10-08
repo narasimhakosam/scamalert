@@ -73,7 +73,7 @@ def analyze_message(message: str, source: str = "unknown") -> AnalysisResult:
             "reason": ind.reason,
         })
 
-    # Build link items
+    # Build link items with full safety breakdown
     links = []
     for lf in link_findings:
         links.append({
@@ -81,7 +81,34 @@ def analyze_message(message: str, source: str = "unknown") -> AnalysisResult:
             "start": lf.start,
             "end": lf.end,
             "risk_flags": lf.risk_flags,
+            "is_shortened": lf.is_shortened,
+            "is_suspicious": lf.risk_score >= 3.0,
+            "safety_verdict": lf.safety_verdict,
+            "threat_type": lf.threat_type or "External Link",
+            "risk_score": lf.risk_score,
+            "risk_explanation": lf.risk_explanation,
         })
+
+    # Determine scam category for student awareness
+    indicator_codes = {ind.code.value for ind in all_indicators}
+    msg_lower = preprocessed.original.lower()
+
+    if classification == Classification.SAFE:
+        scam_category = "Legitimate / Standard Notification"
+    elif "PAYMENT_REQUEST" in indicator_codes and any(k in msg_lower for k in ["intern", "job", "hiring", "select", "seat"]):
+        scam_category = "Internship & Job Fee Fraud"
+    elif "MESSAGING_REDIRECT" in indicator_codes or any(k in msg_lower for k in ["telegram", "t.me", "task", "like video", "daily earn"]):
+        scam_category = "Telegram Task / Like-Video Ponzi"
+    elif "OTP_REQUEST" in indicator_codes or "PASSWORD_REQUEST" in indicator_codes or any(k in msg_lower for k in ["sbi", "bank", "kyc", "card", "upi"]):
+        scam_category = "Bank KYC / Credential Harvesting"
+    elif "GUARANTEED_REWARD" in indicator_codes or any(k in msg_lower for k in ["lottery", "prize", "won", "crore", "lakh"]):
+        scam_category = "Lottery & Gift Voucher Phishing"
+    elif any(k in msg_lower for k in ["parcel", "delivery", "indiapost", "speedpost", "address"]):
+        scam_category = "Courier / Delivery Address Phishing"
+    elif "scholarship" in msg_lower:
+        scam_category = "Fake Scholarship Disbursement"
+    else:
+        scam_category = "Suspicious Digital Solicitation"
 
     # Assemble result
     analysis_id = f"SG-{uuid.uuid4().hex[:5].upper()}"
@@ -93,6 +120,7 @@ def analyze_message(message: str, source: str = "unknown") -> AnalysisResult:
         ruleset_version=RULESET_VERSION,
         risk_score=risk_score,
         classification=classification,
+        scam_category=scam_category,
         ml_label=prediction.label,
         ml_probability=prediction.spam_probability,
         highlights=highlights,
@@ -100,3 +128,4 @@ def analyze_message(message: str, source: str = "unknown") -> AnalysisResult:
         reasons=reasons,
         recommended_actions=actions,
     )
+

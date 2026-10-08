@@ -45,7 +45,7 @@ class HighlightItem(BaseModel):
 
 
 class LinkItem(BaseModel):
-    """A detected link with risk information."""
+    """A detected link with risk and safety verification information."""
     url: str
     original_url: Optional[str] = None
     domain: Optional[str] = None
@@ -54,6 +54,10 @@ class LinkItem(BaseModel):
     risk_flags: list[str] = []
     is_shortened: bool = False
     is_suspicious: bool = False
+    safety_verdict: str = "Neutral / Unverified"
+    threat_type: Optional[str] = None
+    risk_score: float = 0.0
+    risk_explanation: str = ""
 
 
 class IndicatorItem(BaseModel):
@@ -87,6 +91,7 @@ class AnalysisResponse(BaseModel):
     ruleset_version: str
     risk_score: int = Field(..., ge=0, le=100)
     classification: str
+    scam_category: str = "General Alert"
     ml_label: str
     ml_probability: float
     ml_prediction: Optional[MLPredictionInfo] = None
@@ -99,6 +104,7 @@ class AnalysisResponse(BaseModel):
     recommended_actions: list[str] = []
     safety_actions: list[ActionItem] = []
     disclaimer: str = "Risk assessment only; it does not prove that a message is genuine."
+
 
 
 

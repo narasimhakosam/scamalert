@@ -25,12 +25,16 @@ const SAMPLES = {
     text: "Congratulations! You have been selected for Google Summer Internship 2026. Pay Rs 499 registration fee within 10 minutes to confirm your seat: bit.ly/intern-confirm",
     channel: "SMS"
   },
-  upi_domain: {
-    text: "Shortlisted for TCS Campus Placement! Pay ₹750 confirmation fee to UPI: tcs-recruit@ybl within 15 minutes. Complete form at: tcs-recruitment.xyz/claim",
-    channel: "SMS"
-  },
   parttime: {
     text: "Dear Student, earn Rs 3,000 to Rs 5,000 daily working 2 hours from home by liking videos and submitting reviews. No experience needed. Join Telegram now: https://t.me/student_daily_earn",
+    channel: "WhatsApp"
+  },
+  delivery: {
+    text: "India Post: Your parcel #IN839201 is held at distribution hub due to incorrect pincode. Update your address within 24 hours at indiapost-tracking.xyz/update to avoid return.",
+    channel: "SMS"
+  },
+  form: {
+    text: "Urgent: College Placement Cell registration form for 2026 batch is closing today. Fill details and verify UPI for stipend release: https://forms.gle/xY7291a8Kd91",
     channel: "WhatsApp"
   },
   college: {
@@ -43,23 +47,203 @@ const SAMPLES = {
   }
 };
 
-function copyScamAlertCard() {
-  if (!currentAnalysis) return;
-  const score = currentAnalysis.risk_score || 0;
-  const cls = (currentAnalysis.classification || "SAFE").toUpperCase().replace("_", " ");
-  const text = messageInput.value.trim();
-  
-  const cardText = `🚨 SCAMGUARD STUDENT ALERT 🚨
-Risk Index: ${score}/100 [${cls}]
-Analyzed Message: "${text.substring(0, 120)}${text.length > 120 ? "..." : ""}"
-Warning: Do NOT click suspicious links or pay upfront registration fees!
-Verified with Student ScamGuard AI (http://localhost:8000/)`;
+let soundEnabled = true;
 
-  navigator.clipboard.writeText(cardText).then(() => {
-    alert("Scam Alert Card copied to clipboard!\n\nYou can now paste this formatted warning card into your college WhatsApp group to protect your classmates.");
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  const icon = document.getElementById("sound-icon");
+  const text = document.getElementById("sound-text");
+  if (soundEnabled) {
+    if (icon) icon.textContent = "volume_up";
+    if (text) text.textContent = "Sound: ON";
+    showToast("Audio feedback enabled", "info");
+  } else {
+    if (icon) icon.textContent = "volume_off";
+    if (text) text.textContent = "Sound: OFF";
+    showToast("Audio feedback muted", "info");
+  }
+}
+
+function playResultSound(severity) {
+  if (!soundEnabled) return;
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+
+    if (severity === "high_risk") {
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = "sawtooth";
+      osc1.frequency.setValueAtTime(440, ctx.currentTime);
+      osc1.frequency.exponentialRampToValueAtTime(320, ctx.currentTime + 0.25);
+      gain1.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start();
+      osc1.stop(ctx.currentTime + 0.25);
+
+      setTimeout(() => {
+        if (ctx.state === "closed") return;
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = "sawtooth";
+        osc2.frequency.setValueAtTime(380, ctx.currentTime);
+        osc2.frequency.exponentialRampToValueAtTime(220, ctx.currentTime + 0.3);
+        gain2.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start();
+        osc2.stop(ctx.currentTime + 0.3);
+      }, 140);
+    } else if (severity === "suspicious") {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.35);
+    } else {
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = "triangle";
+      osc1.frequency.setValueAtTime(440, ctx.currentTime);
+      gain1.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start();
+      osc1.stop(ctx.currentTime + 0.2);
+
+      setTimeout(() => {
+        if (ctx.state === "closed") return;
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = "triangle";
+        osc2.frequency.setValueAtTime(659.25, ctx.currentTime);
+        gain2.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start();
+        osc2.stop(ctx.currentTime + 0.35);
+      }, 100);
+    }
+  } catch (e) {
+    console.debug("Audio autoplay unsupported or disabled:", e);
+  }
+}
+
+function showToast(message, type = "info") {
+  const container = document.getElementById("toast-container");
+  if (!container) return;
+  const toast = document.createElement("div");
+  const bg = type === "error" ? "bg-red-600 text-white" : type === "success" ? "bg-emerald-600 text-white" : "bg-gray-900 text-white";
+  toast.className = `toast-item ${bg} px-4 py-2.5 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-2 max-w-sm`;
+  toast.innerHTML = `
+    <span class="material-symbols-outlined text-sm">${type === "success" ? "check_circle" : type === "error" ? "error" : "info"}</span>
+    <span>${escapeHtml(message)}</span>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => {
+    if (toast.parentElement) toast.remove();
+  }, 3000);
+}
+
+function shareToWhatsApp() {
+  if (!currentAnalysis) {
+    showToast("Please analyze a message first", "error");
+    return;
+  }
+  const score = currentAnalysis.risk_score || 0;
+  const sev = (currentAnalysis.classification || "Safe").toUpperCase();
+  const cat = currentAnalysis.scam_category || "Suspicious Message";
+  const actions = (currentAnalysis.safety_actions || []).map(a => `• ${a.action}: ${a.description}`).join("\n");
+
+  const text = `🚨 *Student ScamGuard AI Alert*\n\n*Verdict:* ${sev} (${score}/100 Risk Index)\n*Category:* ${cat}\n\n*Safety Advice:*\n${actions}\n\n⚠️ *Do not send money or click unverified links!* Checked via Student ScamGuard AI.`;
+  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  window.open(url, "_blank");
+}
+
+function copyReport() {
+  if (!currentAnalysis) {
+    showToast("Please analyze a message first", "error");
+    return;
+  }
+  const score = currentAnalysis.risk_score || 0;
+  const sev = (currentAnalysis.classification || "Safe").toUpperCase();
+  const cat = currentAnalysis.scam_category || "Suspicious Message";
+  const indicators = (currentAnalysis.indicators || []).map(i => `- [${(i.severity || 'high').toUpperCase()}] ${i.title}: ${i.description}`).join("\n");
+  const actions = (currentAnalysis.safety_actions || []).map(a => `${a.step || 1}. ${a.action} - ${a.description}`).join("\n");
+
+  const reportText = `STUDENT SCAMGUARD AI — SECURITY REPORT
+-----------------------------------------
+Risk Index: ${score}/100 (${sev})
+Category: ${cat}
+Source: ${selectedChannel}
+
+DETECTED INDICATORS:
+${indicators || "None"}
+
+DEFENSIVE ACTION CHECKLIST:
+${actions}
+
+Zero retention student cyber safety evaluation.`;
+
+  navigator.clipboard.writeText(reportText).then(() => {
+    showToast("Report copied to clipboard! Ready to paste.", "success");
+    const copyBtnText = document.getElementById("copy-btn-text");
+    if (copyBtnText) {
+      copyBtnText.textContent = "Copied!";
+      setTimeout(() => { copyBtnText.textContent = "Copy Warning"; }, 2000);
+    }
   }).catch(() => {
-    alert("Warning Card Content:\n\n" + cardText);
+    showToast("Could not copy to clipboard", "error");
   });
+}
+
+function openLinkInspector(urlData) {
+  if (!urlData) return;
+  const modal = document.getElementById("link-inspector-modal");
+  if (!modal) return;
+
+  const urlStr = urlData.original_url || urlData.url || "";
+  const domain = urlData.domain || urlStr.replace(/^https?:\/\//i, "").split("/")[0];
+  const verdict = urlData.safety_verdict || (urlData.is_suspicious ? "High Risk (Unverified)" : "Verified Safe");
+  const threat = urlData.threat_type || (urlData.is_shortened ? "URL Shortener Mask" : "Web Destination");
+  const riskScore = urlData.risk_score !== undefined ? `${urlData.risk_score} / 100` : (urlData.is_suspicious ? "80 / 100" : "10 / 100");
+  const explanation = urlData.risk_explanation || (urlData.is_shortened 
+    ? "This URL shortener obfuscates the real web destination, frequently utilized in SMS phishing to bypass keyword filters." 
+    : "Review domain name carefully before submitting credentials or payments.");
+
+  document.getElementById("inspect-full-url").textContent = urlStr;
+  document.getElementById("inspect-domain").textContent = domain;
+  
+  const verdEl = document.getElementById("inspect-verdict");
+  verdEl.textContent = verdict;
+  if (verdict.toLowerCase().includes("high") || verdict.toLowerCase().includes("malicious")) {
+    verdEl.className = "text-xs font-bold text-red-600";
+  } else if (verdict.toLowerCase().includes("suspicious")) {
+    verdEl.className = "text-xs font-bold text-amber-600";
+  } else {
+    verdEl.className = "text-xs font-bold text-emerald-600";
+  }
+
+  document.getElementById("inspect-threat").textContent = threat;
+  
+  const scoreEl = document.getElementById("inspect-score");
+  scoreEl.textContent = riskScore;
+  scoreEl.className = (parseInt(riskScore) || 0) >= 60 ? "text-xs font-bold text-red-600" : "text-xs font-bold text-emerald-600";
+
+  document.getElementById("inspect-explanation").textContent = explanation;
+
+  modal.classList.remove("hidden");
 }
 
 
@@ -350,6 +534,25 @@ function renderAnalysisResult(result, rawText) {
     pinBar.className = "w-1.5 h-3 bg-safe-main rounded-full";
   }
 
+  // Scam Category Badge
+  const catBadge = document.getElementById("scam-category-badge");
+  const catText = document.getElementById("scam-category-text");
+  if (catBadge && catText) {
+    if (result.scam_category && result.scam_category !== "Generic Scam") {
+      catText.textContent = result.scam_category;
+      catBadge.classList.remove("hidden");
+    } else if (severity === "high_risk" || severity === "suspicious") {
+      const firstInd = (result.indicators && result.indicators[0]) ? result.indicators[0].title : "Suspicious Pattern";
+      catText.textContent = firstInd;
+      catBadge.classList.remove("hidden");
+    } else {
+      catBadge.classList.add("hidden");
+    }
+  }
+
+  // Play audio cue
+  playResultSound(severity);
+
   // 3. Highlighted Message Evidence
   renderHighlightedMessage(rawText, result.evidence_spans || [], result.extracted_urls || []);
 
@@ -530,38 +733,61 @@ function renderExtractedLinks(urls) {
   card.classList.remove("hidden");
   countHeader.textContent = `Detected Links (${urls.length})`;
 
-  const hasSuspicious = urls.some((u) => u.is_suspicious || u.is_shortened);
-  if (hasSuspicious) {
+  // Cache for modal inspector
+  window.lastExtractedUrls = urls;
+
+  const hasHighRisk = urls.some((u) => u.safety_verdict === "High Risk" || u.is_suspicious || u.is_shortened);
+  const hasSuspicious = urls.some((u) => u.safety_verdict === "Suspicious");
+
+  if (hasHighRisk) {
     statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold border bg-red-50 text-red-700 border-red-200";
+    statusBadge.textContent = "High Risk Destinations";
+  } else if (hasSuspicious) {
+    statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold border bg-amber-50 text-amber-700 border-amber-200";
     statusBadge.textContent = "Unverified Destinations";
   } else {
     statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold border bg-green-50 text-green-700 border-green-200";
-    statusBadge.textContent = "Standard Domain Structure";
+    statusBadge.textContent = "Verified Educational / Safe";
   }
 
-  urls.forEach((url) => {
+  urls.forEach((url, idx) => {
     const urlStr = url.original_url || url.url || "";
     const isShort = url.is_shortened;
-    const isSusp = url.is_suspicious;
+    const verdict = url.safety_verdict || (url.is_suspicious ? "High Risk" : "Verified Safe");
+    const threatType = url.threat_type || (isShort ? "URL Shortener Mask" : "Standard Web Link");
+    const explanation = url.risk_explanation || (isShort ? "URL shorteners hide the true destination website, a primary tactic used in SMS phishing." : "Verify domain ownership before accessing.");
+    const isHigh = verdict.toLowerCase().includes("high") || verdict.toLowerCase().includes("malicious") || url.is_suspicious;
 
     const div = document.createElement("div");
-    div.className = "p-3.5 rounded-xl border border-border bg-gray-50/80 flex flex-col gap-2";
+    div.className = "p-3.5 rounded-xl border border-border bg-gray-50/80 flex flex-col gap-2.5 transition-all";
     div.innerHTML = `
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div class="flex items-center gap-2 overflow-hidden">
-          <span class="w-6 h-6 rounded ${isSusp ? "bg-red-100 text-red-600" : "bg-blue-100 text-primary"} flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-sm">${isSusp ? "warning" : "link"}</span>
+          <span class="w-6 h-6 rounded ${isHigh ? "bg-red-100 text-red-600" : "bg-blue-100 text-primary"} flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-sm">${isHigh ? "warning" : "link"}</span>
           </span>
-          <span class="font-mono text-xs font-bold text-primary truncate">${escapeHtml(urlStr)}</span>
+          <span class="font-mono text-xs font-bold text-primary truncate" title="${escapeHtml(urlStr)}">${escapeHtml(urlStr)}</span>
         </div>
         <div class="flex items-center gap-1.5 shrink-0">
-          ${isShort ? '<span class="text-[10px] uppercase font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded">Shortened Link</span>' : ""}
-          ${isSusp ? '<span class="text-[10px] uppercase font-bold bg-red-100 text-red-800 px-2 py-0.5 rounded">High Risk</span>' : '<span class="text-[10px] uppercase font-bold bg-green-100 text-green-800 px-2 py-0.5 rounded">Checked</span>'}
+          <span class="text-[10px] uppercase font-bold ${isHigh ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"} px-2 py-0.5 rounded">
+            ${escapeHtml(verdict)}
+          </span>
+          <button type="button" onclick="openLinkInspector(window.lastExtractedUrls[${idx}])" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-white hover:bg-gray-100 border border-gray-300 text-text-primary transition-colors shadow-2xs">
+            <span class="material-symbols-outlined text-xs text-primary">travel_explore</span>
+            Inspect
+          </button>
         </div>
       </div>
-      <p class="text-xs text-text-secondary">
-        ${isShort ? "⚠️ URL shorteners hide the true destination website, a primary tactic used in SMS phishing." : "Verify domain ownership directly with official institutional contact before browsing."}
-      </p>
+      <div class="flex flex-col gap-1 text-xs">
+        <div class="flex items-center gap-2 text-[11px] text-text-secondary">
+          <span class="font-semibold text-text-primary">Threat Type:</span>
+          <span>${escapeHtml(threatType)}</span>
+          ${url.domain ? `<span class="text-border">·</span><span class="font-mono text-gray-600">${escapeHtml(url.domain)}</span>` : ""}
+        </div>
+        <p class="text-xs text-text-secondary leading-relaxed">
+          ${escapeHtml(explanation)}
+        </p>
+      </div>
     `;
     list.appendChild(div);
   });
@@ -674,54 +900,95 @@ function localFallbackAnalyze(text, channel) {
   const extracted_urls = [];
   let score = 5;
 
-  // Extract URLs (including scheme, shorteners, and bare domains)
-  const urlRegex = /(?:https?:\/\/|www\.)[^\s<>\[\](){}\'"`,;!]+|\b(?:bit\.ly|tinyurl\.com|t\.me|wa\.me|forms\.gle)\/[^\s<>\[\](){}\'"`,;!]+|\b[a-zA-Z0-9\-\.]+\.(?:com|in|org|net|xyz|top|online|site|co|info|app|tech|club|me|live|store|tk)(?:\/[^\s<>\[\](){}\'"`,;!]*)?/gi;
-  let match;
-  while ((match = urlRegex.exec(text)) !== null) {
-    const urlStr = match[0].replace(/[\.,;:!\?\)]+$/, "");
-    if (urlStr.includes("@") && !urlStr.startsWith("http")) continue;
-    const isShort = urlStr.includes("bit.ly") || urlStr.includes("tinyurl") || urlStr.includes("t.me") || urlStr.includes("wa.me") || urlStr.includes("forms.gle");
-    const isSusp = isShort || urlStr.includes(".xyz") || urlStr.includes(".top") || urlStr.includes(".online") || urlStr.includes(".site") || urlStr.includes(".tk");
+  // Extract URLs (multi-pattern matching backend preprocessing)
+  const urlPatterns = [
+    /https?:\/\/[^\s<>"'()]+/gi,
+    /\b(?:t\.me|wa\.me|chat\.whatsapp\.com|forms\.gle|bit\.ly|tinyurl\.com|goo\.gl|is\.gd|cutt\.ly)\/[^\s<>"'()]+/gi,
+    /\b[a-zA-Z0-9-]+\.(?:xyz|top|site|club|buzz|guru|click|fit|cfd|work|vip)(?:\/[^\s<>"'()]*)?/gi
+  ];
+
+  const foundUrls = new Set();
+  urlPatterns.forEach((pat) => {
+    let match;
+    while ((match = pat.exec(text)) !== null) {
+      let rawUrl = match[0].replace(/[.,;:!?)]+$/, "");
+      if (rawUrl) foundUrls.add(rawUrl);
+    }
+  });
+
+  let detectedCategory = "Generic Suspicion";
+
+  foundUrls.forEach((urlStr) => {
+    const isShort = /bit\.ly|tinyurl|goo\.gl|cutt\.ly|is\.gd/i.test(urlStr);
+    const isHighTld = /\.(xyz|top|site|club|buzz|click|fit|cfd|work|vip)/i.test(urlStr);
+    const isMessaging = /t\.me|wa\.me|chat\.whatsapp/i.test(urlStr);
+    const isForm = /forms\.gle|docs\.google\.com\/forms/i.test(urlStr);
+    const isWhitelisted = /\.(ac\.in|edu\.in|gov\.in)\b/i.test(urlStr);
+
+    let verdict = "Verified Safe";
+    let threatType = "Standard Link";
+    let riskExplanation = "Standard web link; verify domain ownership before browsing.";
+    let linkRisk = 10;
+    let isSusp = false;
+
+    if (isWhitelisted) {
+      verdict = "Verified Legitimate";
+      threatType = "Verified Institutional Domain";
+      riskExplanation = "Domain belongs to recognized educational or government institution (.ac.in / .gov.in).";
+      linkRisk = 0;
+    } else if (isShort) {
+      verdict = "High Risk";
+      threatType = "URL Shortener Mask";
+      riskExplanation = "URL shortener disguises actual landing address, commonly used to bypass filters.";
+      linkRisk = 85;
+      isSusp = true;
+      score += 25;
+      detectedCategory = "Phishing Redirect Scam";
+    } else if (isHighTld) {
+      verdict = "High Risk";
+      threatType = "High-Risk Domain Extension (TLD)";
+      riskExplanation = "Disposable domain extension frequently registered for phishing operations.";
+      linkRisk = 90;
+      isSusp = true;
+      score += 30;
+      detectedCategory = "Phishing Site Scam";
+    } else if (isMessaging) {
+      verdict = "Suspicious";
+      threatType = "Off-Platform Messaging Channel";
+      riskExplanation = "Attempts to divert student to untracked channel (Telegram/WhatsApp group) where moderation is absent.";
+      linkRisk = 75;
+      isSusp = true;
+      score += 25;
+      detectedCategory = "Part-Time Task Scam";
+    } else if (isForm) {
+      verdict = "Suspicious";
+      threatType = "Unverified Public Form";
+      riskExplanation = "Free form submission link with zero institutional access control.";
+      linkRisk = 60;
+      isSusp = true;
+      score += 15;
+      detectedCategory = "Fake Placement Form Scam";
+    }
+
+    const domain = urlStr.replace(/^https?:\/\//i, "").split("/")[0];
     extracted_urls.push({
       original_url: urlStr,
-      domain: urlStr.replace(/https?:\/\//, "").split("/")[0],
+      domain: domain,
       is_shortened: isShort,
-      is_suspicious: isSusp
+      is_suspicious: isSusp,
+      safety_verdict: verdict,
+      threat_type: threatType,
+      risk_score: linkRisk,
+      risk_explanation: riskExplanation
     });
-    if (isShort) score += 20;
-    if (isSusp) score += 15;
-  }
-
-  // Extract UPI VPAs
-  const upiRegex = /\b[a-zA-Z0-9\.\-_]+@(?:upi|ybl|okaxis|icici|paytm|axl|ibl|barodampay|sbi|apl|okhdfcbank)\b/gi;
-  let upiMatch;
-  while ((upiMatch = upiRegex.exec(text)) !== null) {
-    const vpa = upiMatch[0];
-    score += 30;
-    const start = upiMatch.index;
-    evidence_spans.push({
-      start_idx: start,
-      end_idx: start + vpa.length,
-      severity: "high",
-      title: "Direct UPI VPA Payment Handle",
-      description: "Direct Virtual Payment Address detected. Never transfer money via UPI collect requests for job or internship offers.",
-      matched_text: vpa
-    });
-    indicators.push({
-      code: "PAYMENT_REQUEST",
-      title: "UPI Payment Handle Detected",
-      severity: "high",
-      description: "Message provides a direct UPI handle for transfer. Legitimate institutions do not ask for UPI transfers.",
-      matched_text: vpa
-    });
-  }
-
+  });
 
   // Rule 1: Upfront Fee
   const feeRegex = /(pay\s+(?:rs\.?|₹)?\s*\d+|registration\s+fee|security\s+deposit|processing\s+fee)/i;
   const feeMatch = text.match(feeRegex);
   if (feeMatch) {
     score += 35;
+    detectedCategory = "Internship Registration Scam";
     const start = text.indexOf(feeMatch[0]);
     evidence_spans.push({
       start_idx: start,
@@ -741,7 +1008,7 @@ function localFallbackAnalyze(text, channel) {
   }
 
   // Rule 2: Urgency
-  const urgRegex = /(within\s+\d+\s+minutes?|immediately|hurry|today\s+only|confirm\s+seat)/i;
+  const urgRegex = /(within\s+\d+\s+(?:minutes?|hours?)|immediately|hurry|today\s+only|confirm\s+seat|held\s+at\s+distribution|avoid\s+return)/i;
   const urgMatch = text.match(urgRegex);
   if (urgMatch) {
     score += 20;
@@ -751,7 +1018,7 @@ function localFallbackAnalyze(text, channel) {
       end_idx: start + urgMatch[0].length,
       severity: "medium",
       title: "Artificial Urgency Pressure",
-      description: "Scammers use countdown timers to rush you into acting before you can verify authenticity.",
+      description: "Scammers use countdown timers and panic triggers to rush you into acting before you can verify authenticity.",
       matched_text: urgMatch[0]
     });
     indicators.push({
@@ -763,31 +1030,42 @@ function localFallbackAnalyze(text, channel) {
     });
   }
 
-  // Rule 3: Guaranteed Selection
-  const selRegex = /(congratulations!|you\s+have\s+been\s+selected|guaranteed\s+income|earn\s+rs\s+\d+)/i;
+  // Rule 3: Guaranteed Selection or Task Lure
+  const selRegex = /(congratulations!|you\s+have\s+been\s+selected|guaranteed\s+income|earn\s+rs\s+\d+|daily\s+working\s+\d+\s+hours|by\s+liking\s+videos)/i;
   const selMatch = text.match(selRegex);
   if (selMatch) {
-    score += 15;
+    score += 20;
+    if (text.toLowerCase().includes("liking") || text.toLowerCase().includes("telegram")) {
+      detectedCategory = "Telegram Part-Time Task Ponzi";
+    } else {
+      detectedCategory = "Unsolicited Internship Scam";
+    }
     const start = text.indexOf(selMatch[0]);
     evidence_spans.push({
       start_idx: start,
       end_idx: start + selMatch[0].length,
       severity: "high",
-      title: "Unsolicited Selection Claim",
-      description: "Offers selection without prior interview, screening, or formal application.",
+      title: "Unsolicited Selection / High Income Promise",
+      description: "Offers high earnings or selection without prior interview, screening, or formal application.",
       matched_text: selMatch[0]
     });
     indicators.push({
       code: "GUARANTEED_SELECTION",
-      title: "Unsolicited Selection Claim",
+      title: "Unsolicited Selection / Ponzi Lure",
       severity: "high",
-      description: "Claims you won or got selected without applying.",
+      description: "Promises easy money or claims selection without legitimate credentials.",
       matched_text: selMatch[0]
     });
   }
 
+  // Check institutional safe indicators
+  if (text.includes(".ac.in") && !feeMatch && !selMatch) {
+    score = 5;
+    detectedCategory = "Legitimate Institutional Notice";
+  }
+
   // Determine classification
-  const finalScore = Math.min(98, Math.max(8, score));
+  const finalScore = Math.min(98, Math.max(5, score));
   let classification = "safe";
   if (finalScore >= 60) classification = "high_risk";
   else if (finalScore >= 30) classification = "suspicious";
@@ -795,6 +1073,7 @@ function localFallbackAnalyze(text, channel) {
   return {
     risk_score: finalScore,
     classification: classification,
+    scam_category: detectedCategory,
     ml_prediction: {
       label: finalScore >= 50 ? "spam" : "ham",
       spam_probability: roundTo(finalScore / 100, 2),

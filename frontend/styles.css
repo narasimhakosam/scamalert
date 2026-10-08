@@ -143,3 +143,75 @@
 .step-card.done span {
   color: #1B5E2B;
 }
+
+/* Toast Notification Styles */
+.toast-item {
+  animation: slideInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards, fadeOutToast 0.3s ease-in 2.7s forwards;
+  pointer-events: auto;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeOutToast {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+/* Print / PDF Document Layout */
+@media print {
+  header,
+  footer,
+  #checker-section,
+  #stepper-section,
+  .modal-backdrop,
+  #toast-container,
+  #highlight-popover,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: #111827 !important;
+    font-size: 11pt !important;
+  }
+
+  #results-section {
+    display: flex !important;
+    gap: 1.5rem !important;
+  }
+
+  article {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #d1d5db !important;
+  }
+
+  /* Watermark header for printed official report */
+  body::before {
+    content: "STUDENT SCAMGUARD AI — SECURITY INCIDENT FORENSIC REPORT";
+    display: block;
+    font-size: 14pt;
+    font-weight: 800;
+    color: #1a40c2;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #1a40c2;
+  }
+}

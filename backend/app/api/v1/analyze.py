@@ -59,8 +59,12 @@ async def analyze(request: AnalysisRequest):
                 "start": l["start"],
                 "end": l["end"],
                 "risk_flags": l["risk_flags"],
-                "is_shortened": "SHORTENED_LINK" in l["risk_flags"],
-                "is_suspicious": len(l["risk_flags"]) > 0,
+                "is_shortened": l.get("is_shortened", "SHORTENED_LINK" in l.get("risk_flags", [])),
+                "is_suspicious": l.get("is_suspicious", len(l.get("risk_flags", [])) > 0),
+                "safety_verdict": l.get("safety_verdict", "Neutral / Unverified"),
+                "threat_type": l.get("threat_type", "External Link"),
+                "risk_score": l.get("risk_score", 0.0),
+                "risk_explanation": l.get("risk_explanation", ""),
             }
             for l in result.links
         ]
@@ -101,6 +105,7 @@ async def analyze(request: AnalysisRequest):
             ruleset_version=result.ruleset_version,
             risk_score=result.risk_score,
             classification=result.classification.value,
+            scam_category=getattr(result, "scam_category", "General Alert"),
             ml_label=result.ml_label,
             ml_probability=result.ml_probability,
             ml_prediction=ml_info,
@@ -114,6 +119,7 @@ async def analyze(request: AnalysisRequest):
             safety_actions=actions_list,
             disclaimer=result.disclaimer,
         )
+
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:

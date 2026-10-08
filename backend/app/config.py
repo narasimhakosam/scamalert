@@ -42,9 +42,13 @@ INDICATOR_WEIGHTS: dict[str, float] = {
     "SHORTENED_LINK": 6,
     "IP_HOST": 8,
     "PUNYCODE_HOST": 6,
-    "KNOWN_PHISHING_URL": 15,
-    "IMPERSONATED_BRAND": 12,
+    "IMPERSONATED_BRAND": 14,
+    "SUSPICIOUS_TLD": 10,
+    "MESSAGING_REDIRECT": 10,
+    "FREE_HOSTING_PHISHING": 10,
+    "UNVERIFIED_FORM_LINK": 6,
 }
+
 
 # URL risk flat contribution.
 URL_RISK_BASE = float(os.getenv("URL_RISK_BASE", "5"))

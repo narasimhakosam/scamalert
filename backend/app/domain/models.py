@@ -33,6 +33,10 @@ class LinkFinding:
     is_punycode: bool = False
     has_suspicious_tokens: bool = False
     risk_score: float = 0.0
+    safety_verdict: str = "Neutral / Unverified"
+    threat_type: Optional[str] = None
+    risk_explanation: str = ""
+
 
 
 @dataclass
@@ -66,4 +70,6 @@ class AnalysisResult:
     links: list[dict] = field(default_factory=list)
     reasons: list[str] = field(default_factory=list)
     recommended_actions: list[str] = field(default_factory=list)
+    scam_category: str = "General Alert"
     disclaimer: str = "Risk assessment only; it does not prove that a message is genuine."
+
