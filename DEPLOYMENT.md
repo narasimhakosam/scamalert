@@ -90,26 +90,20 @@ This guide walks you through deploying:
 
 ## PART 3: Connect Frontend to Render Backend
 
-You have two easy ways to link your Vercel frontend to your Render backend:
+### Method 1: Pre-Configured Live Connection (Already Done!)
+The frontend in this repository is already pre-configured to connect to your live Render backend:
+```
+https://scamalert-gdzg.onrender.com/api/v1
+```
+Whenever you deploy to Vercel, it will automatically connect to your live backend.
 
-### Method 1: Using the Interactive UI Settings (No Code Changes Needed!)
+### Method 2: Using the Interactive UI Settings (On-the-Fly)
 1. Open your deployed Vercel site.
 2. In the top hero section, click the **Backend Status Badge** (`Backend API Ready` / `Cloud Standby`).
 3. In the **Backend API Connection** modal:
-   - Paste your Render URL with `/api/v1`, e.g.:
-     ```
-     https://scamalert-backend.onrender.com/api/v1
-     ```
+   - Paste any Render URL: `https://scamalert-gdzg.onrender.com/api/v1`
    - Click **Save & Connect**.
-4. The frontend will test the connection, verify the model is loaded, and store the preference in your browser's `localStorage`.
-
-### Method 2: Setting the Default in Code
-In [frontend/app.js](file:///c:/Projects/secure%202/student-scamguard-ai/frontend/app.js):
-```javascript
-// Change this line to your Render URL:
-return window.RENDER_API_BASE || "https://scamalert-backend.onrender.com/api/v1";
-```
-Commit and push to `master`. Vercel will automatically redeploy within seconds.
+4. The frontend will ping `/health`, verify the model is loaded, and store the preference in `localStorage`.
 
 ---
 

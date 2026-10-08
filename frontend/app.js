@@ -20,7 +20,7 @@ function getApiBase() {
   }
 
   // Deployed production default (Render cloud service)
-  return window.RENDER_API_BASE || "https://scamalert-backend.onrender.com/api/v1";
+  return window.RENDER_API_BASE || "https://scamalert-gdzg.onrender.com/api/v1";
 }
 
 let API_BASE = getApiBase();
