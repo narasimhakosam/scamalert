@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Student ScamGuard AI — Check Before You Click, Pay, or Share</title>
+  <meta name="description" content="AI-powered scam detection for students. Analyze suspicious SMS, WhatsApp, and internship messages in seconds."/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+  
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "focus-ring": "#1C7ED6",
+            "tertiary": "#863700",
+            "surface-container": "#ebedff",
+            "on-error-container": "#93000a",
+            "background": "#F8F9FC",
+            "surface": "#FFFFFF",
+            "primary": "#1a40c2",
+            "primary-container": "#3b5bdb",
+            "primary-hover": "#324ABF",
+            "primary-subtle": "#EDF2FF",
+            "border": "#D9DEEA",
+            "text-primary": "#1A2033",
+            "text-secondary": "#4A5470",
+            "safe-main": "#2B8A3E",
+            "safe-bg": "#EBFBEE",
+            "safe-text": "#1B5E2B",
+            "suspicious-main": "#E67700",
+            "suspicious-bg": "#FFF4E0",
+            "suspicious-text": "#7A4100",
+            "high-risk-main": "#C92A2A",
+            "high-risk-bg": "#FFF0F0",
+            "high-risk-text": "#8A1C1C",
+            "highlight-high-bg": "#FFE3E3",
+            "highlight-med-bg": "#FFE8CC",
+            "highlight-low-bg": "#FFF3BF",
+            "highlight-link-bg": "#E7F0FF"
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            display: ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body class="bg-background text-text-primary min-h-screen flex flex-col font-sans selection:bg-red-100 selection:text-red-900">
+
+  <!-- Desktop & Header TopAppBar -->
+  <header class="bg-surface border-b border-border shadow-[0_2px_8px_rgba(26,32,51,0.06)] sticky top-0 z-50">
+    <div class="flex justify-between items-center max-w-[1120px] mx-auto px-4 md:px-8 py-3 w-full">
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center gap-3 group" id="brand-logo">
+        <div class="w-10 h-10 rounded-xl bg-primary-subtle text-primary flex items-center justify-center transition-transform group-hover:scale-105 shadow-sm">
+          <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">shield_check</span>
+        </div>
+        <div class="flex flex-col">
+          <span class="font-display text-lg text-primary tracking-tight font-extrabold flex items-center gap-1.5">
+            ScamGuard AI
+            <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">Hackathon Edition</span>
+          </span>
+          <span class="text-xs text-text-secondary leading-none hidden sm:inline">Student Safety Guardian</span>
+        </div>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav aria-label="Main Navigation" class="hidden md:flex items-center gap-6">
+        <button onclick="scrollToChecker()" class="border-b-2 border-primary text-primary font-semibold text-sm pb-1 transition-colors">
+          Check Message
+        </button>
+        <button onclick="openModal('learn-modal')" class="text-text-secondary font-medium text-sm pb-1 hover:text-primary transition-colors">
+          Learn Common Scams
+        </button>
+        <button onclick="openModal('model-modal')" class="text-text-secondary font-medium text-sm pb-1 hover:text-primary transition-colors flex items-center gap-1">
+          <span class="material-symbols-outlined text-base">psychology</span>
+          AI Model & Architecture
+        </button>
+      </nav>
+
+      <!-- Trailing Action Cluster -->
+      <div class="flex items-center gap-2">
+        <button onclick="openModal('emergency-modal')" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-text-secondary hover:text-primary hover:bg-primary-subtle text-xs font-semibold transition-colors">
+          <span class="material-symbols-outlined text-base">support_agent</span>
+          <span>Helplines</span>
+        </button>
+        <button onclick="openModal('report-modal')" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-high-risk-bg text-high-risk-text border border-high-risk-main/30 text-xs font-bold hover:bg-high-risk-main hover:text-white transition-all active:scale-[0.98]">
+          <span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">crisis_alert</span>
+          <span>Report Scam</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-grow max-w-[1120px] mx-auto w-full px-4 md:px-8 py-8 flex flex-col gap-8">
+
+    <!-- Hero / Intro Banner -->
+    <section class="text-center md:text-left flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-blue-50/80 via-white to-indigo-50/60 p-6 rounded-2xl border border-blue-100/80 shadow-sm">
+      <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold mb-2">
+          <span class="w-2 h-2 rounded-full bg-blue-600 animate-ping"></span>
+          Real Hybrid Detection: Trained NLP Classifier + Rule Engine + URL Analyzer
+        </div>
+        <h1 class="font-display text-2xl md:text-3xl font-bold text-text-primary tracking-tight">
+          Student Scam Message Checker
+        </h1>
+        <p class="text-sm md:text-base text-text-secondary mt-1">
+          Check suspicious SMS, WhatsApp, and internship messages before you click, pay, or share personal data.
+        </p>
+      </div>
+      <div class="flex items-center justify-center gap-2 shrink-0">
+        <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 text-xs font-semibold border border-green-200">
+          <span class="material-symbols-outlined text-sm">lock</span>
+          Zero Data Retention
+        </span>
+        <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-200" id="backend-status-badge">
+          <span class="w-2 h-2 rounded-full bg-green-500"></span>
+          Backend API Ready
+        </span>
+      </div>
+    </section>
+
+    <!-- Message Checker Input Card -->
+    <section id="checker-section" aria-label="Message Checker Form" class="bg-surface rounded-2xl border border-border p-6 md:p-8 shadow-[0_2px_12px_rgba(26,32,51,0.06)] relative transition-all">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border mb-4">
+        <div>
+          <h2 class="font-display text-lg font-bold text-text-primary flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">chat</span>
+            Paste suspicious SMS or WhatsApp message
+          </h2>
+          <p class="text-xs text-text-secondary mt-0.5">
+            We do not need access to your inbox. Paste only the specific text you wish to analyze.
+          </p>
+        </div>
+
+        <!-- Channel Selector Chips -->
+        <div class="flex items-center gap-1.5 bg-gray-100/80 p-1 rounded-xl border border-gray-200/60 self-start sm:self-auto">
+          <button type="button" onclick="setChannel('SMS')" class="channel-chip active px-3 py-1 rounded-lg text-xs font-semibold transition-all bg-white text-primary shadow-xs" data-channel="SMS">
+            SMS
+          </button>
+          <button type="button" onclick="setChannel('WhatsApp')" class="channel-chip px-3 py-1 rounded-lg text-xs font-semibold text-text-secondary hover:text-text-primary transition-all" data-channel="WhatsApp">
+            WhatsApp
+          </button>
+          <button type="button" onclick="setChannel('Other')" class="channel-chip px-3 py-1 rounded-lg text-xs font-semibold text-text-secondary hover:text-text-primary transition-all" data-channel="Other">
+            Not Sure
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Test Samples for Hackathon Demonstration -->
+      <div class="mb-4">
+        <div class="text-xs font-semibold text-text-secondary mb-2 flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm text-primary">bolt</span>
+          Quick Hackathon Test Samples:
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="loadSample('internship')" class="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-medium border border-red-200 flex items-center gap-1 transition-colors">
+            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+            ₹499 Internship Fee (High Risk)
+          </button>
+          <button type="button" onclick="loadSample('upi_domain')" class="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-medium border border-red-200 flex items-center gap-1 transition-colors">
+            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+            UPI + Bare Domain Link (.xyz)
+          </button>
+          <button type="button" onclick="loadSample('parttime')" class="px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-medium border border-amber-200 flex items-center gap-1 transition-colors">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            Telegram Daily Task (Suspicious)
+          </button>
+          <button type="button" onclick="loadSample('college')" class="px-2.5 py-1.5 rounded-lg bg-green-50 hover:bg-green-100 text-green-700 text-xs font-medium border border-green-200 flex items-center gap-1 transition-colors">
+            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+            Semester Exam Fee Notice (Safe)
+          </button>
+          <button type="button" onclick="loadSample('bank')" class="px-2.5 py-1.5 rounded-lg bg-green-50 hover:bg-green-100 text-green-700 text-xs font-medium border border-green-200 flex items-center gap-1 transition-colors">
+            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+            Bank Transaction Alert (Safe)
+          </button>
+        </div>
+      </div>
+
+      <!-- Input Textarea Container -->
+      <div class="relative">
+        <textarea
+          id="message-input"
+          rows="6"
+          placeholder="e.g. Congratulations! You have been selected for Google Summer Internship. Pay Rs 499 registration fee within 10 minutes to confirm seat: bit.ly/intern-confirm"
+          class="w-full p-4 rounded-xl border border-border focus:border-primary focus:ring-2 focus:ring-blue-200 outline-none text-base leading-relaxed resize-y font-sans transition-all"
+        ></textarea>
+        
+        <div class="flex items-center justify-between text-xs text-text-secondary mt-2 px-1">
+          <span id="char-counter">0 / 5000 characters</span>
+          <button type="button" onclick="clearMessage()" class="text-text-secondary hover:text-red-600 transition-colors flex items-center gap-0.5">
+            <span class="material-symbols-outlined text-sm">backspace</span>
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <!-- CTA Buttons Row -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-6 pt-4 border-t border-border">
+        <div class="flex items-center gap-2 text-xs text-text-secondary">
+          <span class="material-symbols-outlined text-sm text-green-600">verified_user</span>
+          <span>Analysis takes &lt; 2 seconds. Press <kbd class="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-[11px] font-mono">Ctrl+Enter</kbd> to analyze.</span>
+        </div>
+
+        <button
+          id="analyze-btn"
+          type="button"
+          onclick="handleAnalyze()"
+          class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-primary-hover text-white font-display font-bold text-sm shadow-md hover:shadow-lg transition-all active:scale-[0.98] custom-ring"
+        >
+          <span class="material-symbols-outlined text-xl" id="btn-icon">radar</span>
+          <span id="btn-text">Analyze Message</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Animated Analysis Stepper (Visible during evaluation) -->
+    <section id="stepper-section" class="hidden bg-surface rounded-2xl border border-border p-6 shadow-sm">
+      <div class="text-xs uppercase font-bold tracking-wider text-text-secondary mb-4 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+        Multi-Stage Analysis Pipeline in Progress
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+        <div class="step-card active p-3 rounded-xl border border-border bg-blue-50/50 flex flex-col gap-1 transition-all" id="step-1">
+          <div class="flex items-center gap-1.5 text-xs font-bold text-primary">
+            <span class="w-4 h-4 rounded-full bg-primary text-white flex items-center justify-center text-[10px]">1</span>
+            <span>Parsing Text</span>
+          </div>
+          <span class="text-[11px] text-text-secondary">Unicode normalization</span>
+        </div>
+        <div class="step-card p-3 rounded-xl border border-border bg-gray-50 flex flex-col gap-1 transition-all" id="step-2">
+          <div class="flex items-center gap-1.5 text-xs font-bold text-gray-500">
+            <span class="w-4 h-4 rounded-full bg-gray-300 text-white flex items-center justify-center text-[10px]">2</span>
+            <span>NLP Classifier</span>
+          </div>
+          <span class="text-[11px] text-text-secondary">Trained spam model</span>
+        </div>
+        <div class="step-card p-3 rounded-xl border border-border bg-gray-50 flex flex-col gap-1 transition-all" id="step-3">
+          <div class="flex items-center gap-1.5 text-xs font-bold text-gray-500">
+            <span class="w-4 h-4 rounded-full bg-gray-300 text-white flex items-center justify-center text-[10px]">3</span>
+            <span>Scam Indicators</span>
+          </div>
+          <span class="text-[11px] text-text-secondary">Rule pattern matching</span>
+        </div>
+        <div class="step-card p-3 rounded-xl border border-border bg-gray-50 flex flex-col gap-1 transition-all" id="step-4">
+          <div class="flex items-center gap-1.5 text-xs font-bold text-gray-500">
+            <span class="w-4 h-4 rounded-full bg-gray-300 text-white flex items-center justify-center text-[10px]">4</span>
+            <span>URL Intelligence</span>
+          </div>
+          <span class="text-[11px] text-text-secondary">Domain & link heuristics</span>
+        </div>
+        <div class="step-card p-3 rounded-xl border border-border bg-gray-50 flex flex-col gap-1 transition-all" id="step-5">
+          <div class="flex items-center gap-1.5 text-xs font-bold text-gray-500">
+            <span class="w-4 h-4 rounded-full bg-gray-300 text-white flex items-center justify-center text-[10px]">5</span>
+            <span>Risk Scoring</span>
+          </div>
+          <span class="text-[11px] text-text-secondary">Safety action plan</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Section (Desktop Two-Column Asymmetric Grid) -->
+    <section id="results-section" aria-label="Analysis Results" class="hidden flex-col gap-6">
+
+      <!-- Breadcrumb & Status Meta Bar -->
+      <div class="bg-surface rounded-xl border border-border py-2.5 px-4 flex flex-wrap justify-between items-center text-xs text-text-secondary gap-3 shadow-xs">
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="scrollToChecker()" class="hover:text-primary transition-colors flex items-center gap-1 font-medium">
+            <span class="material-symbols-outlined text-sm">edit</span>
+            <span>Check Another</span>
+          </button>
+          <span>/</span>
+          <span class="text-text-primary font-semibold" id="report-id-label">Scam Report #SG-84920</span>
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <button onclick="copyScamAlertCard()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 font-bold transition-all text-[11px]">
+            <span class="material-symbols-outlined text-sm">content_copy</span>
+            <span>Copy WhatsApp Alert Card</span>
+          </button>
+          <button onclick="window.print()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-text-primary border border-gray-300 font-semibold transition-all text-[11px]">
+            <span class="material-symbols-outlined text-sm">print</span>
+            <span>Print Report</span>
+          </button>
+          <span id="header-risk-pill" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border">
+            <span class="w-1.5 h-1.5 rounded-full" id="header-risk-dot"></span>
+            <span id="header-risk-text">HIGH RISK</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Main Results Grid: 7 cols (Left) + 5 cols (Right) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- LEFT COLUMN: Risk Score Hero, Highlighted Message Evidence, Detected Links (60%) -->
+        <div class="lg:col-span-7 flex flex-col gap-6">
+
+          <!-- 1. Result Assessment Hero Card -->
+          <article class="bg-surface rounded-2xl border border-border p-6 shadow-[0_2px_8px_rgba(26,32,51,0.06)] relative overflow-hidden" id="result-hero-card">
+            <!-- Header Tag -->
+            <div class="flex items-center justify-between pb-3 border-b border-border/70 mb-4">
+              <span class="text-xs uppercase font-extrabold tracking-wider text-text-secondary">RESULT ASSESSMENT</span>
+              <div class="flex items-center gap-1.5 bg-blue-50/80 px-2.5 py-1 rounded-full border border-blue-100 text-xs text-text-secondary">
+                <span class="material-symbols-outlined text-sm text-primary">psychology</span>
+                <span class="font-medium text-text-primary" id="model-tag">Model: spam, 94%</span>
+              </div>
+            </div>
+
+            <!-- Score Display + Severity Badge -->
+            <div class="flex flex-wrap items-baseline justify-between gap-4 mb-2">
+              <div class="flex items-baseline gap-2">
+                <span id="risk-score-display" class="font-display text-5xl lg:text-6xl font-extrabold leading-none tracking-tight text-high-risk-main">
+                  91
+                </span>
+                <span class="font-display text-2xl font-bold text-text-secondary">/ 100</span>
+              </div>
+
+              <!-- Severity Badge -->
+              <div id="severity-badge-container" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border shadow-xs bg-high-risk-bg text-high-risk-text border-high-risk-main/40">
+                <span id="severity-icon" class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">shield_alert</span>
+                <span id="severity-text" class="font-display font-bold text-xs uppercase tracking-wide">HIGH RISK</span>
+              </div>
+            </div>
+
+            <!-- Summary Copy -->
+            <p id="summary-copy" class="text-sm md:text-base font-semibold text-text-primary mb-5">
+              This message contains multiple severe warning signs typical of scams targeting students.
+            </p>
+
+            <!-- RiskMeter Component -->
+            <div class="bg-gray-50/80 rounded-xl p-4 border border-border mb-2" role="region" aria-label="Risk Meter">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-xs font-semibold text-text-primary">Calculated Risk Index</span>
+                <span id="meter-threat-label" class="text-xs font-bold text-high-risk-main">91% High Threat</span>
+              </div>
+
+              <!-- Meter Track with 3 Partitioned Semantic Zones -->
+              <div class="relative w-full h-4 rounded-full overflow-hidden flex bg-border/40 p-0.5">
+                <div class="w-[29%] h-full bg-safe-main rounded-l-full" title="Safe Zone (0–29)"></div>
+                <div class="w-[30%] h-full bg-suspicious-main" title="Suspicious Zone (30–59)"></div>
+                <div class="w-[41%] h-full bg-high-risk-main rounded-r-full" title="High Risk Zone (60–100)"></div>
+              </div>
+
+              <!-- Dial Indicator Needle Anchor & Ticks -->
+              <div class="relative w-full h-5 mt-1">
+                <div id="meter-pin" class="absolute -translate-x-1/2 flex flex-col items-center transition-all duration-700 ease-out" style="left: 91%;">
+                  <div id="pin-arrow" class="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[6px] border-b-high-risk-main"></div>
+                  <div id="pin-bar" class="w-1.5 h-3 bg-high-risk-main rounded-full"></div>
+                </div>
+              </div>
+
+              <!-- Meter Zone Labels -->
+              <div class="grid grid-cols-3 text-[11px] font-bold text-text-secondary pt-1 border-t border-border/50">
+                <div class="text-left text-safe-text">Safe (0–29)</div>
+                <div class="text-center text-suspicious-text">Suspicious (30–59)</div>
+                <div class="text-right text-high-risk-text">High Risk (60–100)</div>
+              </div>
+            </div>
+
+            <div class="text-xs text-text-secondary mt-3 flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-base text-primary">info</span>
+              <span>Based on trained natural language model, scam keyword heuristics, and URL destination analysis.</span>
+            </div>
+          </article>
+
+          <!-- 2. Highlighted Message Evidence Card (HERO OF EVIDENCE) -->
+          <article class="bg-surface rounded-2xl border border-border p-6 shadow-[0_2px_8px_rgba(26,32,51,0.06)] relative">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-border mb-4 gap-2">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-xl">manage_search</span>
+                <h2 class="font-display text-base font-bold text-text-primary">Highlighted Message Evidence</h2>
+              </div>
+
+              <!-- Legend bar -->
+              <div class="flex items-center gap-2 text-xs text-text-secondary bg-surface-container/40 px-3 py-1 rounded-lg border border-border">
+                <span class="w-2 h-2 rounded-full bg-high-risk-main inline-block"></span>
+                <span>Warning signs</span>
+                <span class="text-border">·</span>
+                <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>
+                <span>Links</span>
+                <span class="text-border">·</span>
+                <span class="font-medium text-text-primary hidden sm:inline">Click highlight to jump to breakdown</span>
+              </div>
+            </div>
+
+            <!-- Verbatim Raw Message Card with Inline Highlights -->
+            <div id="highlighted-message-container" class="bg-background border border-border rounded-xl p-5 relative text-base leading-loose tracking-normal shadow-inner font-sans">
+              <!-- Rendered dynamically by app.js -->
+            </div>
+
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-text-secondary pt-1 border-t border-border/40">
+              <span id="source-meta-snippet" class="italic">Channel source: SMS</span>
+              <span class="flex items-center gap-1 text-green-700 font-medium">
+                <span class="material-symbols-outlined text-sm">lock</span>
+                Zero-retention student privacy applied
+              </span>
+            </div>
+          </article>
+
+          <!-- 3. Extracted Links Intelligence Card -->
+          <article class="bg-surface rounded-2xl border border-border p-6 shadow-[0_2px_8px_rgba(26,32,51,0.06)]" id="extracted-links-card">
+            <div class="flex items-center justify-between pb-3 border-b border-border mb-4">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-xl">link</span>
+                <h2 class="font-display text-base font-bold text-text-primary" id="links-header">Detected Links (1)</h2>
+              </div>
+              <span id="links-status-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold border">
+                Unverified Destination
+              </span>
+            </div>
+
+            <div id="links-list-container" class="flex flex-col gap-3">
+              <!-- Rendered dynamically -->
+            </div>
+          </article>
+        </div>
+
+        <!-- RIGHT COLUMN: Why We Flagged It (Indicators) & What You Should Do (Actions) (40%) -->
+        <div class="lg:col-span-5 flex flex-col gap-6">
+
+          <!-- 1. Why We Flagged It (Indicator Breakdown) -->
+          <article class="bg-surface rounded-2xl border border-border p-6 shadow-[0_2px_8px_rgba(26,32,51,0.06)]">
+            <div class="flex items-center justify-between pb-3 border-b border-border mb-4">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-xl">flag</span>
+                <h2 class="font-display text-base font-bold text-text-primary">Why We Flagged It</h2>
+              </div>
+              <span id="indicator-count-badge" class="text-xs bg-gray-100 font-bold px-2 py-0.5 rounded-full text-text-secondary">
+                3 indicators
+              </span>
+            </div>
+
+            <p class="text-xs text-text-secondary mb-4">
+              Every score contribution maps to observable textual and link evidence detected in your message.
+            </p>
+
+            <div id="indicators-list-container" class="flex flex-col gap-3">
+              <!-- Rendered dynamically -->
+            </div>
+          </article>
+
+          <!-- 2. What You Should Do (Defensive Action Checklist) -->
+          <article class="bg-surface rounded-2xl border border-border p-6 shadow-[0_2px_8px_rgba(26,32,51,0.06)]">
+            <div class="flex items-center justify-between pb-3 border-b border-border mb-4">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-safe-main text-xl">verified_user</span>
+                <h2 class="font-display text-base font-bold text-text-primary">What You Should Do</h2>
+              </div>
+              <span class="text-xs bg-green-50 text-green-700 font-bold px-2 py-0.5 rounded-full border border-green-200">
+                Action Plan
+              </span>
+            </div>
+
+            <div id="actions-list-container" class="flex flex-col gap-3">
+              <!-- Rendered dynamically -->
+            </div>
+          </article>
+
+          <!-- 3. Immediate Quick Helpline Card -->
+          <div class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl border border-blue-200 p-5 flex flex-col gap-3">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-xl">contact_emergency</span>
+              <span class="font-display text-sm font-bold text-primary">Need Immediate Assistance?</span>
+            </div>
+            <p class="text-xs text-text-secondary leading-relaxed">
+              If you have already paid money or shared bank OTPs, immediately contact your bank and the National Cyber Crime Helpline.
+            </p>
+            <div class="flex items-center justify-between pt-2 border-t border-blue-200/60">
+              <div class="text-xs font-bold text-text-primary">
+                Call: <a href="tel:1930" class="text-primary hover:underline">1930</a> (National Helpline)
+              </div>
+              <button onclick="openModal('emergency-modal')" class="text-xs text-primary font-bold hover:underline flex items-center gap-0.5">
+                All Contacts <span class="material-symbols-outlined text-sm">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-surface border-t border-border mt-auto py-6">
+    <div class="max-w-[1120px] mx-auto px-4 md:px-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-text-secondary">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-base">shield</span>
+        <span class="font-bold text-text-primary">Student ScamGuard AI</span>
+        <span>— Hackathon Project for Student Cyber Safety</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <button onclick="openModal('model-modal')" class="hover:text-primary transition-colors">Model & ML Architecture</button>
+        <button onclick="openModal('learn-modal')" class="hover:text-primary transition-colors">Common Scams Guide</button>
+        <button onclick="openModal('emergency-modal')" class="hover:text-primary transition-colors">Emergency Helplines</button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL: Educational Learn Guide -->
+  <div id="learn-modal" class="modal-backdrop hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-surface rounded-2xl border border-border shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 md:p-8 relative">
+      <button onclick="closeModal('learn-modal')" class="absolute top-4 right-4 text-text-secondary hover:text-text-primary p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+
+      <div class="flex items-center gap-2 text-primary mb-2">
+        <span class="material-symbols-outlined text-2xl">school</span>
+        <h3 class="font-display text-xl font-bold">Top 5 Scams Targeting College Students</h3>
+      </div>
+      <p class="text-xs text-text-secondary mb-6">
+        Scammers prey on student anxieties around internships, tuition fees, and part-time income. Learn their common tricks:
+      </p>
+
+      <div class="space-y-4">
+        <div class="p-4 rounded-xl border border-red-200 bg-red-50/50">
+          <h4 class="font-bold text-sm text-red-900 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+            1. The "Internship Registration Fee" Scam
+          </h4>
+          <p class="text-xs text-red-800 mt-1 leading-relaxed">
+            <strong>The Trick:</strong> You receive an SMS/WhatsApp claiming you have been shortlisted for an internship at a top MNC, but must pay a "security deposit" or "training fee" (₹499 – ₹2,500) within 15 minutes.<br/>
+            <strong>Reality:</strong> Real companies <em>pay you</em> for internships. They never charge application or registration fees.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl border border-amber-200 bg-amber-50/50">
+          <h4 class="font-bold text-sm text-amber-900 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            2. The "Telegram Daily Task / Like Videos" Scam
+          </h4>
+          <p class="text-xs text-amber-800 mt-1 leading-relaxed">
+            <strong>The Trick:</strong> "Earn ₹2,000–₹5,000/day by liking YouTube videos or writing Google reviews. Join Telegram @daily_task." They pay ₹150 for initial tasks, then ask you to "invest" in prepaid tasks to unlock higher payouts.<br/>
+            <strong>Reality:</strong> Once you deposit larger sums, the Telegram channel blocks you.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl border border-blue-200 bg-blue-50/50">
+          <h4 class="font-bold text-sm text-blue-900 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+            3. The "Fake Scholarship Disbursement" SMS
+          </h4>
+          <p class="text-xs text-blue-800 mt-1 leading-relaxed">
+            <strong>The Trick:</strong> "Your government merit scholarship of ₹25,000 is approved. Click bit.ly/scholarship-claim to link Aadhaar/UPI."<br/>
+            <strong>Reality:</strong> The phishing link mimics a banking portal to capture your UPI PIN and credentials.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl border border-gray-200 bg-gray-50">
+          <h4 class="font-bold text-sm text-gray-900 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-gray-500"></span>
+            4. Delivery Package / Electricity Disconnection Panic
+          </h4>
+          <p class="text-xs text-gray-700 mt-1 leading-relaxed">
+            <strong>The Trick:</strong> "Your India Post parcel is held due to incomplete address. Update at parcel-tracking.xyz within 2 hours or return to sender."<br/>
+            <strong>Reality:</strong> Creates artificial panic to rush you into submitting credit card or personal details.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: AI Model & Architecture -->
+  <div id="model-modal" class="modal-backdrop hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-surface rounded-2xl border border-border shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 md:p-8 relative">
+      <button onclick="closeModal('model-modal')" class="absolute top-4 right-4 text-text-secondary hover:text-text-primary p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+
+      <div class="flex items-center gap-2 text-primary mb-2">
+        <span class="material-symbols-outlined text-2xl">neurology</span>
+        <h3 class="font-display text-xl font-bold">AI Model & Detection Architecture</h3>
+      </div>
+      <p class="text-xs text-text-secondary mb-6">
+        Student ScamGuard AI uses a hybrid detection pipeline combining ML classification with deterministic rule engines for maximum explainability:
+      </p>
+
+      <div class="space-y-4 text-xs">
+        <div class="p-3.5 rounded-xl border border-border bg-gray-50">
+          <div class="font-bold text-text-primary text-sm mb-1">1. Trained NLP Classifier (Scikit-Learn + TF-IDF)</div>
+          <p class="text-text-secondary leading-relaxed">
+            Trained on the UCI SMS Spam Collection dataset and curated student scam corpora using Logistic Regression with character/word n-grams. Outputs calibrated <code class="bg-gray-200 px-1 py-0.5 rounded text-[11px]">ham</code> vs <code class="bg-gray-200 px-1 py-0.5 rounded text-[11px]">spam</code> probabilities.
+          </p>
+        </div>
+
+        <div class="p-3.5 rounded-xl border border-border bg-gray-50">
+          <div class="font-bold text-text-primary text-sm mb-1">2. Deterministic Scam Indicator Engine</div>
+          <p class="text-text-secondary leading-relaxed">
+            Scans for student-specific threat markers: Upfront payment requests, OTP/credential harvesting, artificial countdown timers, guaranteed selection promises, and brand impersonation. Produces exact character offsets for evidence highlighting.
+          </p>
+        </div>
+
+        <div class="p-3.5 rounded-xl border border-border bg-gray-50">
+          <div class="font-bold text-text-primary text-sm mb-1">3. URL Intelligence & Link Heuristics</div>
+          <p class="text-text-secondary leading-relaxed">
+            Extracts embedded URLs, evaluates URL shorteners (bit.ly, tinyurl), raw IP addresses, suspicious TLDs (.xyz, .top, .buzz), and look-alike brand domains.
+          </p>
+        </div>
+
+        <div class="p-3.5 rounded-xl border border-border bg-gray-50">
+          <div class="font-bold text-text-primary text-sm mb-1">4. Explainability & Action Mapping</div>
+          <p class="text-text-secondary leading-relaxed">
+            The system never gives an unexplainable "black-box" decision. Every point in the 0–100 risk score traces directly back to a detected signal with matched verbatim text quotes and tailored defensive guidance.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Emergency Contacts & Helplines -->
+  <div id="emergency-modal" class="modal-backdrop hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-surface rounded-2xl border border-border shadow-2xl max-w-md w-full p-6 relative">
+      <button onclick="closeModal('emergency-modal')" class="absolute top-4 right-4 text-text-secondary hover:text-text-primary p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+
+      <div class="flex items-center gap-2 text-primary mb-2">
+        <span class="material-symbols-outlined text-2xl">support_agent</span>
+        <h3 class="font-display text-lg font-bold">Official Cyber Crime Helplines</h3>
+      </div>
+      <p class="text-xs text-text-secondary mb-4">
+        If you have lost money or compromised your credentials, take immediate action:
+      </p>
+
+      <div class="space-y-3 text-xs">
+        <div class="p-3 rounded-xl border border-blue-200 bg-blue-50/60 flex items-center justify-between">
+          <div>
+            <div class="font-bold text-text-primary">National Cyber Crime Helpline</div>
+            <div class="text-text-secondary">Toll-free 24x7 emergency line</div>
+          </div>
+          <a href="tel:1930" class="px-3 py-1.5 bg-primary text-white font-bold rounded-lg hover:bg-primary-hover transition-colors">
+            1930
+          </a>
+        </div>
+
+        <div class="p-3 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-between">
+          <div>
+            <div class="font-bold text-text-primary">National Cyber Crime Portal</div>
+            <div class="text-text-secondary">File online financial fraud report</div>
+          </div>
+          <a href="https://cybercrime.gov.in" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 border border-border text-primary font-bold rounded-lg hover:bg-white transition-colors">
+            cybercrime.gov.in
+          </a>
+        </div>
+
+        <div class="p-3 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-between">
+          <div>
+            <div class="font-bold text-text-primary">Chakshu Portal (DoT)</div>
+            <div class="text-text-secondary">Report suspected fraud communication</div>
+          </div>
+          <a href="https://sancharsaathi.gov.in" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 border border-border text-primary font-bold rounded-lg hover:bg-white transition-colors">
+            Chakshu Portal
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Report Scam -->
+  <div id="report-modal" class="modal-backdrop hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-surface rounded-2xl border border-border shadow-2xl max-w-md w-full p-6 relative">
+      <button onclick="closeModal('report-modal')" class="absolute top-4 right-4 text-text-secondary hover:text-text-primary p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+
+      <div class="flex items-center gap-2 text-red-600 mb-2">
+        <span class="material-symbols-outlined text-2xl">crisis_alert</span>
+        <h3 class="font-display text-lg font-bold">Report This Scam</h3>
+      </div>
+      <p class="text-xs text-text-secondary mb-4">
+        Help protect other students by reporting this malicious message to authorities:
+      </p>
+
+      <div class="space-y-3 text-xs mb-4">
+        <div class="p-3 rounded-xl border border-red-200 bg-red-50/50">
+          <div class="font-bold text-red-900 mb-1">Step 1: Block & Report on WhatsApp</div>
+          <p class="text-red-800">Open conversation > Tap ⋮ > More > Report > Check "Block contact and delete chat".</p>
+        </div>
+
+        <div class="p-3 rounded-xl border border-red-200 bg-red-50/50">
+          <div class="font-bold text-red-900 mb-1">Step 2: Report to Chakshu Portal</div>
+          <p class="text-red-800">Submit the sender phone number and message screenshot on Department of Telecommunications' Sanchar Saathi portal.</p>
+        </div>
+      </div>
+
+      <a href="https://sancharsaathi.gov.in/sfc/" target="_blank" rel="noopener noreferrer" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-high-risk-main hover:bg-red-700 text-white font-bold text-xs shadow-md transition-all">
+        <span>Open Chakshu Reporting Portal</span>
+        <span class="material-symbols-outlined text-sm">open_in_new</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Tooltip Anchor Element for Interactive Highlights -->
+  <div id="highlight-popover" class="hidden absolute z-40 bg-surface border rounded-xl p-3.5 shadow-xl w-80 text-xs transition-opacity duration-150 pointer-events-auto">
+    <div class="flex items-start justify-between gap-2 mb-1.5">
+      <div class="flex items-center gap-1.5">
+        <span id="popover-badge-num" class="w-4 h-4 rounded-full text-white flex items-center justify-center text-[10px] font-bold">1</span>
+        <span id="popover-title" class="font-bold text-text-primary">Indicator Title</span>
+      </div>
+      <span id="popover-severity" class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded">Severity</span>
+    </div>
+    <p id="popover-desc" class="text-text-secondary leading-relaxed mb-2">Description</p>
+    <div class="flex items-center justify-between pt-1.5 border-t border-border/60">
+      <span id="popover-category" class="font-semibold text-text-secondary text-[11px]">Category</span>
+      <button id="popover-jump-btn" class="text-primary hover:underline font-bold flex items-center gap-0.5 text-[11px]">
+        View breakdown <span class="material-symbols-outlined text-xs">arrow_forward</span>
+      </button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

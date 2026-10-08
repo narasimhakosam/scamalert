@@ -1,0 +1,145 @@
+/* Student ScamGuard AI Custom Styles */
+
+/* Google Material Symbols base rules */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom accessible focus ring */
+.custom-ring:focus-visible {
+  outline: 3px solid #1C7ED6;
+  outline-offset: 2px;
+}
+
+/* Highlight styles corresponding to severity levels */
+.hl-high {
+  background-color: #FFE3E3;
+  border-bottom: 2px solid #C92A2A;
+  color: #8A1C1C;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline;
+}
+.hl-high:hover, .hl-high.active {
+  background-color: #FED7D7;
+  box-shadow: 0 0 0 2px #C92A2A;
+}
+
+.hl-medium {
+  background-color: #FFE8CC;
+  border-bottom: 2px dashed #E67700;
+  color: #7A4100;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline;
+}
+.hl-medium:hover, .hl-medium.active {
+  background-color: #FEEBC8;
+  box-shadow: 0 0 0 2px #E67700;
+}
+
+.hl-low {
+  background-color: #FFF3BF;
+  border-bottom: 2px dotted #B08900;
+  color: #5F370E;
+  border-radius: 4px;
+  padding: 2px 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline;
+}
+.hl-low:hover, .hl-low.active {
+  background-color: #FEFCBF;
+  box-shadow: 0 0 0 2px #B08900;
+}
+
+.hl-link {
+  background-color: #E7F0FF;
+  border-bottom: 2px solid #1a40c2;
+  color: #1a40c2;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline;
+}
+.hl-link:hover, .hl-link.active {
+  background-color: #DBEAFE;
+  box-shadow: 0 0 0 2px #1a40c2;
+}
+
+/* Superscript badge on highlighted span */
+.hl-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  margin-left: 3px;
+  vertical-align: super;
+  line-height: 1;
+}
+
+/* Highlight pulse when scrolled to */
+@keyframes highlightFlash {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+  50% { transform: scale(1.02); box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.4); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+
+.card-flash {
+  animation: highlightFlash 1s ease-out;
+}
+
+/* Modal animation */
+.modal-backdrop {
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Smooth meter transition */
+#meter-pin {
+  transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Stepper animations */
+.step-card.active {
+  border-color: #3B5BDB;
+  background-color: #EEF2FF;
+  box-shadow: 0 2px 6px rgba(59, 91, 219, 0.1);
+}
+
+.step-card.done {
+  border-color: #2B8A3E;
+  background-color: #F0FDF4;
+}
+
+.step-card.done span {
+  color: #1B5E2B;
+}

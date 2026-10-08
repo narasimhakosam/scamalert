@@ -1,0 +1,20 @@
+{
+  "name": "student-scamguard-ai-frontend",
+  "version": "1.0.0",
+  "description": "Student ScamGuard AI — Hackathon Web Application Frontend",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx serve -l 5173 .",
+    "start": "npx serve -l 3000 .",
+    "preview": "npx serve -l 5173 ."
+  },
+  "keywords": [
+    "scamguard",
+    "student-safety",
+    "anti-phishing",
+    "cybersecurity",
+    "ai"
+  ],
+  "author": "ScamGuard Team",
+  "license": "MIT"
+}
