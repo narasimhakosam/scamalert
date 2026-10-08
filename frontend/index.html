@@ -128,10 +128,10 @@
           <span class="material-symbols-outlined text-sm">lock</span>
           Zero Data Retention
         </span>
-        <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-200" id="backend-status-badge">
+        <button type="button" onclick="openApiSettingsModal()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-200 hover:border-indigo-400 transition-all shadow-2xs cursor-pointer" id="backend-status-badge" title="Click to configure Cloud Backend URL (Render)">
           <span class="w-2 h-2 rounded-full bg-green-500"></span>
-          Backend API Ready
-        </span>
+          <span>Backend API Ready</span>
+        </button>
       </div>
     </section>
 
@@ -741,6 +741,61 @@
       <button id="popover-jump-btn" class="text-primary hover:underline font-bold flex items-center gap-0.5 text-[11px]">
         View breakdown <span class="material-symbols-outlined text-xs">arrow_forward</span>
       </button>
+    </div>
+  </div>
+
+  <!-- MODAL: Backend API Connection Settings (Render / Vercel Cloud) -->
+  <div id="api-settings-modal" class="modal-backdrop hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-surface rounded-2xl border border-border shadow-2xl max-w-lg w-full p-6 relative">
+      <button onclick="closeModal('api-settings-modal')" class="absolute top-4 right-4 text-text-secondary hover:text-text-primary p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+
+      <div class="flex items-center gap-2 text-primary mb-2">
+        <span class="material-symbols-outlined text-2xl">cloud_sync</span>
+        <h3 class="font-display text-lg font-bold">Backend API Connection</h3>
+      </div>
+      <p class="text-xs text-text-secondary mb-4 leading-relaxed">
+        Connect this frontend (deployed on Vercel) to your FastAPI Python backend (deployed on Render).
+      </p>
+
+      <div class="space-y-3 text-xs mb-4">
+        <div>
+          <label for="api-url-input" class="block font-bold text-text-primary mb-1">
+            API Endpoint URL (Backend /api/v1):
+          </label>
+          <input
+            id="api-url-input"
+            type="url"
+            placeholder="https://scamalert-backend.onrender.com/api/v1"
+            class="w-full p-3 rounded-xl border border-border focus:border-primary focus:ring-2 focus:ring-blue-200 outline-none font-mono text-xs text-text-primary bg-background"
+          />
+        </div>
+
+        <div class="p-3 rounded-xl border border-blue-200 bg-blue-50/70 text-blue-900 leading-relaxed">
+          <div class="font-bold flex items-center gap-1 mb-0.5">
+            <span class="material-symbols-outlined text-sm">info</span>
+            Render Free Tier Notice:
+          </div>
+          Free Render instances spin down after inactivity. The first request takes <strong>~30–50 seconds</strong> while the container wakes up and loads the scikit-learn model.
+        </div>
+
+        <div id="api-test-feedback" class="text-xs min-h-[1.25rem]"></div>
+      </div>
+
+      <div class="flex items-center justify-between gap-2 pt-3 border-t border-border">
+        <button type="button" onclick="resetApiSettings()" class="px-3 py-2 rounded-xl text-text-secondary hover:text-text-primary text-xs font-semibold hover:bg-gray-100 transition-colors">
+          Reset Default
+        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeModal('api-settings-modal')" class="px-3.5 py-2 border border-border rounded-xl text-xs font-semibold hover:bg-gray-50 transition-colors">
+            Cancel
+          </button>
+          <button type="button" onclick="saveApiSettings()" class="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl transition-colors shadow-xs">
+            Save & Connect
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 

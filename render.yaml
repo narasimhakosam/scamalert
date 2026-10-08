@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: scamalert-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/v1/health
+    plan: free
+    region: oregon
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: ENVIRONMENT
+        value: production
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: ML_BASE_MAX
+        value: "55"
+      - key: RATE_LIMIT_PER_MINUTE
+        value: "60"

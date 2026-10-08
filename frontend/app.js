@@ -3,7 +3,27 @@
  * Integrates with FastAPI /api/v1/analyze/message with client-side fallback
  */
 
-const API_BASE = "http://localhost:8000/api/v1";
+function getApiBase() {
+  const custom = localStorage.getItem("scamguard_api_base");
+  if (custom && custom.trim()) {
+    return custom.trim().replace(/\/+$/, "");
+  }
+
+  const isLocal =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1" ||
+    window.location.hostname === "" ||
+    window.location.hostname.startsWith("192.168.");
+
+  if (isLocal) {
+    return "http://localhost:8000/api/v1";
+  }
+
+  // Deployed production default (Render cloud service)
+  return window.RENDER_API_BASE || "https://scamalert-backend.onrender.com/api/v1";
+}
+
+let API_BASE = getApiBase();
 
 let selectedChannel = "SMS";
 let currentAnalysis = null;
@@ -327,28 +347,95 @@ function closeModal(id) {
 // Check Backend Health
 async function checkBackendHealth() {
   try {
-    const res = await fetch(`${API_BASE}/health`, { method: "GET" });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const res = await fetch(`${API_BASE}/health`, { method: "GET", signal: controller.signal });
+    clearTimeout(timeoutId);
+
     if (res.ok) {
       const data = await res.json();
+      const isCloud = API_BASE.includes("onrender.com") || API_BASE.includes("https://");
       backendStatusBadge.innerHTML = `
         <span class="w-2 h-2 rounded-full bg-green-500"></span>
-        Backend Live (Model: ${data.model_loaded ? "Loaded" : "Ready"})
+        <span>${isCloud ? "Cloud API Live" : "Backend Live"} (${data.model_loaded ? "Model Ready" : "Standby"})</span>
       `;
-      backendStatusBadge.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 text-xs font-semibold border border-green-200";
+      backendStatusBadge.className = "inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 text-xs font-semibold border border-green-200 hover:border-green-400 transition-all shadow-2xs cursor-pointer";
+      backendStatusBadge.title = `Connected to ${API_BASE} (Click to change)`;
+      return true;
     } else {
       setBackendOffline();
+      return false;
     }
   } catch (err) {
     setBackendOffline();
+    return false;
   }
 }
 
 function setBackendOffline() {
+  const isCloud = API_BASE.includes("onrender.com") || API_BASE.includes("https://");
   backendStatusBadge.innerHTML = `
     <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-    Hybrid Engine Active
+    <span>${isCloud ? "Cloud Standby" : "Hybrid Engine Active"}</span>
   `;
-  backendStatusBadge.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 text-xs font-semibold border border-amber-200";
+  backendStatusBadge.className = "inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 text-xs font-semibold border border-amber-200 hover:border-amber-400 transition-all shadow-2xs cursor-pointer";
+  backendStatusBadge.title = `Could not reach ${API_BASE}. Click to configure Render endpoint or check wake-up.`;
+}
+
+function openApiSettingsModal() {
+  const modal = document.getElementById("api-settings-modal");
+  const input = document.getElementById("api-url-input");
+  const feedback = document.getElementById("api-test-feedback");
+  if (modal && input) {
+    input.value = API_BASE;
+    if (feedback) feedback.innerHTML = "";
+    modal.classList.remove("hidden");
+    input.focus();
+  }
+}
+
+async function saveApiSettings() {
+  const input = document.getElementById("api-url-input");
+  const feedback = document.getElementById("api-test-feedback");
+  let val = input.value.trim();
+
+  if (!val) {
+    localStorage.removeItem("scamguard_api_base");
+    API_BASE = getApiBase();
+  } else {
+    // Automatically attach /api/v1 if omitted
+    if (!val.endsWith("/api/v1")) {
+      val = val.replace(/\/+$/, "") + "/api/v1";
+    }
+    localStorage.setItem("scamguard_api_base", val);
+    API_BASE = val;
+  }
+
+  if (feedback) {
+    feedback.innerHTML = `<span class="text-blue-600 font-semibold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span> Testing connection to ${escapeHtml(API_BASE)}...</span>`;
+  }
+
+  const success = await checkBackendHealth();
+  if (feedback) {
+    if (success) {
+      feedback.innerHTML = `<span class="text-green-600 font-bold">✓ Successfully connected to backend! Model is loaded.</span>`;
+      setTimeout(() => closeModal("api-settings-modal"), 1200);
+      showToast("API endpoint updated & verified", "success");
+    } else {
+      feedback.innerHTML = `<span class="text-amber-700 font-medium">⚠️ Endpoint saved. Note: Free Render services take 30–50s to wake up on first ping. Retrying automatically.</span>`;
+      showToast("API endpoint saved (instance waking up)", "info");
+    }
+  }
+}
+
+function resetApiSettings() {
+  localStorage.removeItem("scamguard_api_base");
+  API_BASE = getApiBase();
+  const input = document.getElementById("api-url-input");
+  if (input) input.value = API_BASE;
+  const feedback = document.getElementById("api-test-feedback");
+  if (feedback) feedback.innerHTML = `<span class="text-text-secondary">Reset to auto-detected default: <code>${escapeHtml(API_BASE)}</code></span>`;
+  checkBackendHealth();
 }
 
 // Main Analyze Handler
